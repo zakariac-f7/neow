@@ -1355,22 +1355,75 @@
       });
     });
 
-    // Add event listeners to all install buttons
-    document.addEventListener('click', function(e) {
-      if (e.target.classList.contains('btn-install')) {
-        const link = e.target.getAttribute('data-link');
-        const name = e.target.getAttribute('data-name');
-        const icon = e.target.getAttribute('data-icon');
-        
-        if (link) {
-          install(icon, name, link);
+    // Mobile-friendly event handling
+    function setupInstallButtons() {
+      // Use event delegation for better performance
+      document.addEventListener('click', function(e) {
+        // Check if the clicked element or its parent is an install button
+        let target = e.target;
+        while (target && !target.classList.contains('btn-install')) {
+          if (target.parentElement) {
+            target = target.parentElement;
+          } else {
+            break;
+          }
         }
-      }
-    });
+        
+        if (target && target.classList.contains('btn-install')) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          const link = target.getAttribute('data-link');
+          const name = target.getAttribute('data-name');
+          const icon = target.getAttribute('data-icon');
+          
+          if (link) {
+            install(icon, name, link);
+          }
+          
+          // Prevent any further event propagation
+          return false;
+        }
+      });
+      
+      // Add touch event listeners for mobile devices
+      document.addEventListener('touchstart', function(e) {
+        let target = e.target;
+        while (target && !target.classList.contains('btn-install')) {
+          if (target.parentElement) {
+            target = target.parentElement;
+          } else {
+            break;
+          }
+        }
+        
+        if (target && target.classList.contains('btn-install')) {
+          // Add a visual feedback for touch
+          target.style.opacity = '0.8';
+        }
+      }, {passive: true});
+      
+      document.addEventListener('touchend', function(e) {
+        let target = e.target;
+        while (target && !target.classList.contains('btn-install')) {
+          if (target.parentElement) {
+            target = target.parentElement;
+          } else {
+            break;
+          }
+        }
+        
+        if (target && target.classList.contains('btn-install')) {
+          // Remove visual feedback
+          target.style.opacity = '';
+        }
+      }, {passive: true});
+    }
 
     // Initialize everything
     initTrendingCarousel();
     renderApps(APPS);
+    setupInstallButtons();
 
     // VPN check
     (async function() {
